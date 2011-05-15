@@ -1,5 +1,5 @@
 Linux::Prctl -- Control process attributes through prctl
-==========================================================
+========================================================
 
 The linux prctl function allows you to control specific characteristics of a
 process' behaviour. Usage of the function is fairly messy though, due to
@@ -18,7 +18,7 @@ Still missing in version 0.5
 
 INSTALLATION
 
-yOu can download the latest code from http://github.com/seveas/python-prctl
+You can download the latest code from http://github.com/seveas/python-prctl
 
 To install this module type the following:
 
