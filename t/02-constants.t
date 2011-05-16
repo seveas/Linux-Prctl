@@ -4,7 +4,7 @@ use warnings;
 use Test::More tests => 30;
 use Linux::Prctl;
 
-SKIP: { 
+SKIP: {
     open(my $fh, '<', '/usr/include/linux/prctl.h') or
     skip "prctl.h not available", 24;
 

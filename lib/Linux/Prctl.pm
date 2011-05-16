@@ -4,17 +4,15 @@ use 5.008005;
 use strict;
 use warnings;
 
+our $VERSION = '0.50';
+
+require XSLoader;
+XSLoader::load('Linux::Prctl', $VERSION);
+
 require Exporter;
 
 our @ISA = qw(Exporter);
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaratio use Linux::Prctl ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
 our %EXPORT_TAGS = (
 'constants' => [ qw(
         ENDIAN_BIG
@@ -54,46 +52,39 @@ our %EXPORT_TAGS = (
     )]
 );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{constants} }, @{ $EXPORT_TAGS{functions} } );
-
-our @EXPORT = qw(
-	
-);
-
-our $VERSION = '0.50';
-
-require XSLoader;
-XSLoader::load('Linux::Prctl', $VERSION);
-
 # Some functions may not be defined, we want to stay compatible
 # with centos 5, which uses linux 2.6.18. Anything newer than that is
-# guarded with #ifdef's 
-for('get_mce_kill', 'set_mce_kill', 'set_ptracer', 'get_seccomp', 'set_seccomp',
-    'get_securebits', 'set_securebits', 'get_timerslack', 'set_timerslack',
-    'get_tsc', 'set_tsc', 'get_unalign', 'set_unalign') {
+# guarded with #ifdef's
+for(qw(get_mce_kill set_mce_kill set_ptracer get_seccomp set_seccomp
+    get_securebits set_securebits get_timerslack set_timerslack
+    get_tsc set_tsc get_unalign set_unalign)) {
     if(__PACKAGE__->can($_)) {
-        push @EXPORT_OK, $_;
         push @{$EXPORT_TAGS{functions}}, $_;
     }
 }
-for('MCE_KILL_DEFAULT', 'MCE_KILL_EARLY', 'MCE_KILL_LATE', 'TSC_ENABLE', 'TSC_SIGSEGV',
-    'UNALIGN_NOPRINT', 'UNALIGN_SIGBUS') {
+for(qw(MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE TSC_ENABLE TSC_SIGSEGV
+    UNALIGN_NOPRINT UNALIGN_SIGBUS)) {
     if(__PACKAGE__->can($_)) {
-        push @EXPORT_OK, $_;
         push @{$EXPORT_TAGS{constants}}, $_;
     }
 }
 
 if(__PACKAGE__->can('get_securebits')) {
-    for ('SECURE_KEEP_CAPS', 'SECURE_KEEP_CAPS_LOCKED', 'SECURE_NOROOT', 'SECURE_NOROOT_LOCKED',
-         'SECURE_NO_SETUID_FIXUP', 'SECURE_NO_SETUID_FIXUP_LOCKED') {
-        push @EXPORT_OK, $_;
+    for(qw(SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED
+         SECURE_NOROOT SECURE_NOROOT_LOCKED
+         SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED)) {
         push @{$EXPORT_TAGS{securebits}}, $_;
     }
     require Linux::Prctl::Securebits;
     our $securebits = Linux::Prctl::Securebits->new();
     tie %$securebits, 'Linux::Prctl::Securebits';
 }
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{constants} },
+                   @{ $EXPORT_TAGS{functions} },
+                   @{ $EXPORT_TAGS{securebits} } );
+our @EXPORT;
+
 1;
 
 __END__
@@ -308,7 +299,7 @@ read, see set_tsc.
 
 Set unaligned access control flag. Pass UNALIGN_NOPRINT to silently fix up
 unaligned user accesses, or UNALIGN_SIGBUS to generate SIGBUS on unaligned user
-access.  
+access.
 
 This function only works on ia64, parisc, PowerPC and Alpha systems.
 
@@ -318,14 +309,14 @@ Return unaligned access control bits, see set_unalign.
 
 =head3 set_securebits(bitmap)
 
-Set the "securebits" flags of the calling thread. 
+Set the "securebits" flags of the calling thread.
 
 It is not recommended to use this function directly, use the
 Linux::Prctl::Securebits object instead.
 
 =head3 get_securebits()
 
-Get the "securebits" flags of the calling thread. 
+Get the "securebits" flags of the calling thread.
 
 As with set_securebits, it is not recommended to use this function directly,
 use the $Linux::Prctl::Securebits object instead.
