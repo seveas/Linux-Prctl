@@ -3,6 +3,7 @@ MANIFEST
 ppport.h
 Prctl.xs
 README
+securebits.h
 t/01-use.t
 t/02-constants.t
 t/dumpable.t
@@ -14,8 +15,10 @@ t/name.t
 t/pdeathsig.t
 t/ptracer.t
 t/seccomp.t
+t/secbits.t
 t/timerslack.t
 t/timing.t
 t/tsc.t
 t/unalign.t
 lib/Linux/Prctl.pm
+lib/Linux/Prctl/Securebits.pm

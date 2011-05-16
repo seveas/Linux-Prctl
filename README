@@ -25,6 +25,7 @@ To install this module type the following:
    perl Makefile.PL
    make
    make test
+   (Some tests need root privileges, run 'sudo make test' if you trust me)
    make install
 
 DEPENDENCIES

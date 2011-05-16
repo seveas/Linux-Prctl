@@ -2,6 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ppport.h"
+#include "securebits.h"
 
 #include <sys/prctl.h>
 #include <stdio.h>
@@ -255,6 +256,54 @@ get_seccomp()
         RETVAL = prctl(PR_GET_SECCOMP, 0, 0, 0, 0);
     OUTPUT:
         RETVAL
+
+#endif
+
+#ifdef PR_SET_SECUREBITS
+int
+set_securebits(bits)
+    int bits
+    CODE:
+        RETVAL = prctl(PR_SET_SECUREBITS, bits, 0, 0, 0);
+    OUTPUT:
+        RETVAL
+
+int
+get_securebits()
+    CODE:
+        RETVAL = prctl(PR_GET_SECUREBITS, 0, 0, 0, 0);
+    OUTPUT:
+        RETVAL
+
+int
+SECURE_KEEP_CAPS()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_KEEP_CAPS)));
+
+int
+SECURE_KEEP_CAPS_LOCKED()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_KEEP_CAPS_LOCKED)));
+
+int
+SECURE_NOROOT()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_NOROOT)));
+
+int
+SECURE_NOROOT_LOCKED()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_NOROOT_LOCKED)));
+
+int
+SECURE_NO_SETUID_FIXUP()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_NO_SETUID_FIXUP)));
+
+int
+SECURE_NO_SETUID_FIXUP_LOCKED()
+    PPCODE:
+        PUSHs(sv_2mortal(newSViv(SECURE_NO_SETUID_FIXUP_LOCKED)));
 
 #endif
 

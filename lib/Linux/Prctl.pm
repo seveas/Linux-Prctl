@@ -35,6 +35,7 @@ our %EXPORT_TAGS = (
         TIMING_STATISTICAL
         TIMING_TIMESTAMP
     )],
+'securebits' => [],
 'functions' => [ qw(
         get_dumpable
         set_dumpable
@@ -68,8 +69,8 @@ XSLoader::load('Linux::Prctl', $VERSION);
 # with centos 5, which uses linux 2.6.18. Anything newer than that is
 # guarded with #ifdef's 
 for('get_mce_kill', 'set_mce_kill', 'set_ptracer', 'get_seccomp', 'set_seccomp',
-    'get_timerslack', 'set_timerslack', 'get_tsc', 'set_tsc',
-    'get_unalign', 'set_unalign') {
+    'get_securebits', 'set_securebits', 'get_timerslack', 'set_timerslack',
+    'get_tsc', 'set_tsc', 'get_unalign', 'set_unalign') {
     if(__PACKAGE__->can($_)) {
         push @EXPORT_OK, $_;
         push @{$EXPORT_TAGS{functions}}, $_;
@@ -83,11 +84,19 @@ for('MCE_KILL_DEFAULT', 'MCE_KILL_EARLY', 'MCE_KILL_LATE', 'TSC_ENABLE', 'TSC_SI
     }
 }
 
-# Preloaded methods go here.
-
+if(__PACKAGE__->can('get_securebits')) {
+    for ('SECURE_KEEP_CAPS', 'SECURE_KEEP_CAPS_LOCKED', 'SECURE_NOROOT', 'SECURE_NOROOT_LOCKED',
+         'SECURE_NO_SETUID_FIXUP', 'SECURE_NO_SETUID_FIXUP_LOCKED') {
+        push @EXPORT_OK, $_;
+        push @{$EXPORT_TAGS{securebits}}, $_;
+    }
+    require Linux::Prctl::Securebits;
+    our $securebits = Linux::Prctl::Securebits->new();
+    tie %$securebits, 'Linux::Prctl::Securebits';
+}
 1;
+
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
@@ -698,6 +707,7 @@ Like noroot, but irreversible
 
 - None of the capability stuff is actually implemented at the moment
 - get_ptracer is not yet implemented
+- croak on -1 in setters in Prctl.xs
 
 =head1 SEE ALSO
 

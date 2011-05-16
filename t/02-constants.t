@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 24;
+use Test::More tests => 30;
 use Linux::Prctl;
 
 SKIP: { 
@@ -39,4 +39,21 @@ SKIP: {
     is(Linux::Prctl::TSC_SIGSEGV, $consts{PR_TSC_SIGSEGV}, "TSC_SIGSEGV correctly defined");
     is(Linux::Prctl::UNALIGN_NOPRINT, $consts{PR_UNALIGN_NOPRINT}, "UNALIGN_NOPRINT correctly defined");
     is(Linux::Prctl::UNALIGN_SIGBUS, $consts{PR_UNALIGN_SIGBUS}, "UNALIGN_SIGBUS correctly defined");
+}
+SKIP: {
+    open(my $fh, '<', 'securebits.h') or
+    skip "securebits.h not available", 6;
+
+    my %consts;
+    while(<$fh>) {
+        if(/^#\s*define\s+([A-Z_]+)\s+([0-9]+|0x[0-9a-fA-F]+)(?:\s|$|\/)/) {
+            $consts{$1} = eval($2);
+        }
+    }
+    is(Linux::Prctl::SECURE_KEEP_CAPS, $consts{SECURE_KEEP_CAPS}, "SECURE_KEEP_CAPS correctly defined");
+    is(Linux::Prctl::SECURE_KEEP_CAPS_LOCKED, $consts{SECURE_KEEP_CAPS_LOCKED}, "SECURE_KEEP_CAPS correctly defined");
+    is(Linux::Prctl::SECURE_NOROOT, $consts{SECURE_NOROOT}, "SECURE_NOROOT correctly defined");
+    is(Linux::Prctl::SECURE_NOROOT_LOCKED, $consts{SECURE_NOROOT_LOCKED}, "SECURE_NOROOT correctly defined");
+    is(Linux::Prctl::SECURE_NO_SETUID_FIXUP, $consts{SECURE_NO_SETUID_FIXUP}, "SECURE_NO_SETUID_FIXUP correctly defined");
+    is(Linux::Prctl::SECURE_NO_SETUID_FIXUP_LOCKED, $consts{SECURE_NO_SETUID_FIXUP_LOCKED}, "SECURE_NO_SETUID_FIXUP correctly defined");
 }
