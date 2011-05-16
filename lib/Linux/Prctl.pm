@@ -657,8 +657,6 @@ Like noroot, but irreversible
 =head1 TODO
 
 - None of the capability stuff is actually implemented at the moment
-- get_ptracer is not yet implemented
-- croak on -1 in setters in Prctl.xs
 
 =head1 SEE ALSO
 

@@ -7,8 +7,15 @@
 #include <sys/capability.h>
 #include <sys/prctl.h>
 #include <stdio.h>
+#include <unistd.h>
+
 
 #include "const-c.inc"
+
+#ifdef PR_SET_PTRACER
+#define NOT_SET (-1)
+static int __cached_ptracer;
+#endif
 
 MODULE = Linux::Prctl     PACKAGE = Linux::Prctl
 
@@ -151,6 +158,16 @@ set_ptracer(pid)
     int pid
     CODE:
         RETVAL = prctl(PR_SET_PTRACER, pid, 0, 0, 0);
+        __cached_ptracer = pid;
+    OUTPUT:
+        RETVAL
+
+int get_ptracer()
+    CODE:
+        if(__cached_ptracer == NOT_SET){
+            __cached_ptracer = (int)getppid();
+        }
+        RETVAL = __cached_ptracer;
     OUTPUT:
         RETVAL
 
