@@ -1,5 +1,55 @@
 use 5.008005;
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
+use ExtUtils::Constant qw(WriteConstants);
+use Fcntl qw(SEEK_SET);
+
+my @constants = qw(
+        CAP_AUDIT_CONTROL
+        ENDIAN_BIG
+        ENDIAN_LITTLE
+        ENDIAN_PPC_LITTLE
+        FPEMU_NOPRINT
+        FPEMU_SIGFPE
+        FP_EXC_ASYNC
+        FP_EXC_DISABLED
+        FP_EXC_DIV
+        FP_EXC_INV
+        FP_EXC_NONRECOV
+        FP_EXC_OVF
+        FP_EXC_PRECISE
+        FP_EXC_RES
+        FP_EXC_SW_ENABLE
+        FP_EXC_UND
+        MCE_KILL_DEFAULT
+        MCE_KILL_EARLY
+        MCE_KILL_LATE
+        SECBIT_KEEP_CAPS
+        SECBIT_KEEP_CAPS_LOCKED
+        SECBIT_NOROOT
+        SECBIT_NOROOT_LOCKED
+        SECBIT_NO_SETUID_FIXUP
+        SECBIT_NO_SETUID_FIXUP_LOCKED
+        SECURE_KEEP_CAPS
+        SECURE_KEEP_CAPS_LOCKED
+        SECURE_NOROOT
+        SECURE_NOROOT_LOCKED
+        SECURE_NO_SETUID_FIXUP
+        SECURE_NO_SETUID_FIXUP_LOCKED
+        TIMING_STATISTICAL
+        TIMING_TIMESTAMP
+        TSC_ENABLE
+        TSC_SIGSEGV
+        UNALIGN_NOPRINT
+        UNALIGN_SIGBUS
+);
+
+WriteConstants(
+    NAME => 'Linux::Prctl',
+    NAMES => [@constants],
+);
 
 WriteMakefile(
     NAME              => 'Linux::Prctl',
@@ -12,3 +62,34 @@ WriteMakefile(
     DEFINE            => '',
     INC               => '',
 );
+
+# Patch up const-c.inc
+my ($fh, $content);
+open($fh, '+<', 'const-c.inc');
+read($fh, $content, 100_000_000);
+
+$content =~ s/#ifdef (?!(CAP|SEC))/#ifdef PR_/g;
+$content =~ s/iv_return = (?!(CAP|SEC))/iv_return = PR_/g;
+
+truncate $fh, 0;
+seek $fh, 0, SEEK_SET;
+print $fh $content;
+close $fh;
+
+# Make sure all constants are known to Prctl.pm
+
+my $securebits = join(' ', grep(/^SEC/, @constants));
+my $capabilities = join(' ', grep(/^CAP/, @constants));
+my $constants = join(' ', @constants);
+
+open($fh, '+<', 'lib/Linux/Prctl.pm');
+read($fh, $content, 100_000_000);
+
+$content =~ s/'capabilities' => .*/'capabilities' => [qw($capabilities)],/;
+$content =~ s/'securebits' => .*/'securebits' => [qw($securebits)],/;
+$content =~ s/'constants' => .*/'constants' => [qw($constants)],/;
+
+truncate $fh, 0;
+seek $fh, 0, SEEK_SET;
+print $fh $content;
+close $fh;

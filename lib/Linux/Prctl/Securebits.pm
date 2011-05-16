@@ -1,5 +1,6 @@
 package Linux::Prctl::Securebits;
 use Tie::Hash;
+use Carp qw(croak);
 
 use vars qw(@ISA);
 @ISA = qw(Tie::StdHash);
@@ -11,15 +12,10 @@ sub new {
     return bless($self, $class);
 }
 
-sub bits {
-    return {
-        'keep_caps' => Linux::Prctl->can('SECURE_KEEP_CAPS')->(),
-        'keep_caps_locked' => Linux::Prctl->can('SECURE_KEEP_CAPS_LOCKED')->(),
-        'noroot' => Linux::Prctl->can('SECURE_NOROOT')->(),
-        'noroot_locked' => Linux::Prctl->can('SECURE_NOROOT_LOCKED')->(),
-        'no_setuid_fixup' => Linux::Prctl->can('SECURE_NO_SETUID_FIXUP')->(),
-        'no_setuid_fixup_locked' => Linux::Prctl->can('SECURE_NO_SETUID_FIXUP_LOCKED')->(),
-    }
+sub bit {
+    my ($self, $bit) = @_;
+    croak("Unknown secbit: $bit") unless $bit =~ /^(keep_caps|noroot|no_setuid_fixup)(locked)?/;
+    return Linux::Prctl::constant('SECBIT_' . uc($bit));
 }
 
 sub set_securebits {
@@ -34,17 +30,17 @@ sub get_securebits {
 
 sub STORE {
     my ($self, $key, $value) = @_;
-    $key = $self->bits->{$key} if exists $self->bits->{$key};
+    $key = $self->bit($key);
     my $nbits = $self->get_securebits();
-    $nbits |= (1 << $key) if $value;
-    $nbits ^= (1 << $key) if (($nbits & (1 << $key)) && !$value);
+    $nbits |= $key if $value;
+    $nbits ^= $key if (($nbits & $key) && !$value);
     $self->set_securebits($nbits);
 }
 
 sub FETCH {
     my ($self, $key) = @_;
-    $key = $self->bits->{$key} if exists $self->bits->{$key};
-    return ($self->get_securebits() & (1 << $key)) ? 1 : 0;
+    $key = $self->bit($key);
+    return ($self->get_securebits() & $key) ? 1 : 0;
 }
 
 1;

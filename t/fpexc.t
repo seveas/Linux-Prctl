@@ -9,7 +9,7 @@ my $arch = uname;
 
 SKIP: {
     skip "get_fpexc/set_fpexc are powerpc specific", 20 unless $arch eq 'powerpc';
-    for(FPEXC_SW_ENABLE, FPEXC_DIV, FPEXC_OVF, FPEXC_UND, FPEXC_RES, FPEXC_INV, FPEXC_DISABLED, FPEXC_NONRECOV, FPEXC_ASYNC, FPEXC_PRECISE) {
+    for(FP_EXC_SW_ENABLE, FP_EXC_DIV, FP_EXC_OVF, FP_EXC_UND, FP_EXC_RES, FP_EXC_INV, FP_EXC_DISABLED, FP_EXC_NONRECOV, FP_EXC_ASYNC, FP_EXC_PRECISE) {
         is(set_fpexc($_), 0, "Setting fpexc to $_");
         is(get_fpexc, $_, "Checking whether fpexc is $_");
     }

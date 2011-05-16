@@ -4,10 +4,15 @@
 #include "ppport.h"
 #include "securebits.h"
 
+#include <sys/capability.h>
 #include <sys/prctl.h>
 #include <stdio.h>
 
+#include "const-c.inc"
+
 MODULE = Linux::Prctl     PACKAGE = Linux::Prctl
+
+INCLUDE: const-xs.inc
 
 int
 get_dumpable()
@@ -43,21 +48,6 @@ set_endian(endianness)
     OUTPUT:
         RETVAL
 
-int
-ENDIAN_BIG()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_ENDIAN_BIG)));
-
-int
-ENDIAN_LITTLE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_ENDIAN_LITTLE)));
-
-int
-ENDIAN_PPC_LITTLE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_ENDIAN_PPC_LITTLE)));
-
 int get_fpemu()
     INIT:
         int fpemu = 0;
@@ -76,16 +66,6 @@ set_fpemu(fpemu)
     OUTPUT:
         RETVAL
 
-int
-FPEMU_NOPRINT()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FPEMU_NOPRINT)));
-
-int
-FPEMU_SIGFPE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FPEMU_SIGFPE)));
-
 int get_fpexc()
     INIT:
         int fpexc = 0;
@@ -103,56 +83,6 @@ set_fpexc(fpexc)
         RETVAL = prctl(PR_SET_FPEXC, fpexc, 0, 0, 0);
     OUTPUT:
         RETVAL
-
-int
-FPEXC_SW_ENABLE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_SW_ENABLE)));
-
-int
-FPEXC_DIV()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_DIV)));
-
-int
-FPEXC_OVF()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_OVF)));
-
-int
-FPEXC_UND()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_UND)));
-
-int
-FPEXC_RES()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_RES)));
-
-int
-FPEXC_INV()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_INV)));
-
-int
-FPEXC_DISABLED()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_DISABLED)));
-
-int
-FPEXC_NONRECOV()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_NONRECOV)));
-
-int
-FPEXC_ASYNC()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_ASYNC)));
-
-int
-FPEXC_PRECISE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_FP_EXC_PRECISE)));
 
 # New in 2.6.32, but named and implemented inconsistently. The linux
 # implementation has two ways of setting the policy to the default, and thus
@@ -176,21 +106,6 @@ get_mce_kill()
         RETVAL = prctl(PR_GET_MCE_KILL, 0, 0, 0, 0);
     OUTPUT:
         RETVAL
-
-int
-MCE_KILL_DEFAULT()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_MCE_KILL_DEFAULT)));
-
-int
-MCE_KILL_EARLY()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_MCE_KILL_EARLY)));
-
-int
-MCE_KILL_LATE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_MCE_KILL_LATE)));
 
 #endif
 
@@ -275,36 +190,6 @@ get_securebits()
     OUTPUT:
         RETVAL
 
-int
-SECURE_KEEP_CAPS()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_KEEP_CAPS)));
-
-int
-SECURE_KEEP_CAPS_LOCKED()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_KEEP_CAPS_LOCKED)));
-
-int
-SECURE_NOROOT()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_NOROOT)));
-
-int
-SECURE_NOROOT_LOCKED()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_NOROOT_LOCKED)));
-
-int
-SECURE_NO_SETUID_FIXUP()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_NO_SETUID_FIXUP)));
-
-int
-SECURE_NO_SETUID_FIXUP_LOCKED()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(SECURE_NO_SETUID_FIXUP_LOCKED)));
-
 #endif
 
 #ifdef PR_GET_TIMERSLACK
@@ -340,16 +225,6 @@ get_timing()
     OUTPUT:
         RETVAL
 
-int
-TIMING_STATISTICAL()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_TIMING_STATISTICAL)));
-
-int
-TIMING_TIMESTAMP()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_TIMING_TIMESTAMP)));
-
 #ifdef PR_SET_TSC
 int
 set_tsc(tsc)
@@ -367,16 +242,6 @@ get_tsc()
         RETVAL = tsc;
     OUTPUT:
         RETVAL
-
-int
-TSC_ENABLE()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_TSC_ENABLE)));
-
-int
-TSC_SIGSEGV()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_TSC_SIGSEGV)));
 
 #endif
 
@@ -396,14 +261,4 @@ get_unalign()
         RETVAL = unalign;
     OUTPUT:
         RETVAL
-
-int
-UNALIGN_NOPRINT()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_UNALIGN_NOPRINT)));
-
-int
-UNALIGN_SIGBUS()
-    PPCODE:
-        PUSHs(sv_2mortal(newSViv(PR_UNALIGN_SIGBUS)));
 

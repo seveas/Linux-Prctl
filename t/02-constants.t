@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 30;
-use Linux::Prctl;
+use Linux::Prctl qw(:constants);
 
 SKIP: {
     open(my $fh, '<', '/usr/include/linux/prctl.h') or
@@ -20,16 +20,16 @@ SKIP: {
     is(Linux::Prctl::ENDIAN_PPC_LITTLE, $consts{PR_ENDIAN_PPC_LITTLE}, "ENDIAN_PPC_LITTLE correctly defined");
     is(Linux::Prctl::FPEMU_NOPRINT, $consts{PR_FPEMU_NOPRINT}, "FPEMU_NOPRINT correctly defined");
     is(Linux::Prctl::FPEMU_SIGFPE, $consts{PR_FPEMU_SIGFPE}, "FPEMU_SIGFPE correctly defined");
-    is(Linux::Prctl::FPEXC_SW_ENABLE, $consts{PR_FP_EXC_SW_ENABLE}, "FPEXC_SW_ENABLE correctly defined");
-    is(Linux::Prctl::FPEXC_DIV, $consts{PR_FP_EXC_DIV}, "FPEXC_DIV correctly defined");
-    is(Linux::Prctl::FPEXC_OVF, $consts{PR_FP_EXC_OVF}, "FPEXC_OVF correctly defined");
-    is(Linux::Prctl::FPEXC_UND, $consts{PR_FP_EXC_UND}, "FPEXC_UND correctly defined");
-    is(Linux::Prctl::FPEXC_RES, $consts{PR_FP_EXC_RES}, "FPEXC_RES correctly defined");
-    is(Linux::Prctl::FPEXC_INV, $consts{PR_FP_EXC_INV}, "FPEXC_INV correctly defined");
-    is(Linux::Prctl::FPEXC_DISABLED, $consts{PR_FP_EXC_DISABLED}, "FPEXC_DISABLED correctly defined");
-    is(Linux::Prctl::FPEXC_NONRECOV, $consts{PR_FP_EXC_NONRECOV}, "FPEXC_NONRECOV correctly defined");
-    is(Linux::Prctl::FPEXC_ASYNC, $consts{PR_FP_EXC_ASYNC}, "FPEXC_ASYNC correctly defined");
-    is(Linux::Prctl::FPEXC_PRECISE, $consts{PR_FP_EXC_PRECISE}, "FPEXC_PRECISE correctly defined");
+    is(Linux::Prctl::FP_EXC_SW_ENABLE, $consts{PR_FP_EXC_SW_ENABLE}, "FP_EXC_SW_ENABLE correctly defined");
+    is(Linux::Prctl::FP_EXC_DIV, $consts{PR_FP_EXC_DIV}, "FP_EXC_DIV correctly defined");
+    is(Linux::Prctl::FP_EXC_OVF, $consts{PR_FP_EXC_OVF}, "FP_EXC_OVF correctly defined");
+    is(Linux::Prctl::FP_EXC_UND, $consts{PR_FP_EXC_UND}, "FP_EXC_UND correctly defined");
+    is(Linux::Prctl::FP_EXC_RES, $consts{PR_FP_EXC_RES}, "FP_EXC_RES correctly defined");
+    is(Linux::Prctl::FP_EXC_INV, $consts{PR_FP_EXC_INV}, "FP_EXC_INV correctly defined");
+    is(Linux::Prctl::FP_EXC_DISABLED, $consts{PR_FP_EXC_DISABLED}, "FP_EXC_DISABLED correctly defined");
+    is(Linux::Prctl::FP_EXC_NONRECOV, $consts{PR_FP_EXC_NONRECOV}, "FPEXC_NONRECOV correctly defined");
+    is(Linux::Prctl::FP_EXC_ASYNC, $consts{PR_FP_EXC_ASYNC}, "FPEXC_ASYNC correctly defined");
+    is(Linux::Prctl::FP_EXC_PRECISE, $consts{PR_FP_EXC_PRECISE}, "FPEXC_PRECISE correctly defined");
     is(Linux::Prctl::MCE_KILL_DEFAULT, $consts{PR_MCE_KILL_DEFAULT}, "MCE_KILL_DEFAULT correctly defined");
     is(Linux::Prctl::MCE_KILL_EARLY, $consts{PR_MCE_KILL_EARLY}, "MCE_KILL_EARLY correctly defined");
     is(Linux::Prctl::MCE_KILL_LATE, $consts{PR_MCE_KILL_LATE}, "MCE_KILL_LATE correctly defined");

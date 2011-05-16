@@ -7,74 +7,22 @@ use warnings;
 our $VERSION = '0.50';
 
 require XSLoader;
+my @noexport = keys %Linux::Prctl::;
 XSLoader::load('Linux::Prctl', $VERSION);
+my @from_xs = grep {$a = $_; !grep {$_ eq $a} @noexport} keys %Linux::Prctl::;
 
 require Exporter;
-
 our @ISA = qw(Exporter);
+use Carp qw(croak);
 
 our %EXPORT_TAGS = (
-'constants' => [ qw(
-        ENDIAN_BIG
-        ENDIAN_LITTLE
-        ENDIAN_PPC_LITTLE
-        FPEMU_NOPRINT
-        FPEMU_SIGFPE
-        FPEXC_SW_ENABLE
-        FPEXC_DIV
-        FPEXC_OVF
-        FPEXC_UND
-        FPEXC_RES
-        FPEXC_INV
-        FPEXC_DISABLED
-        FPEXC_NONRECOV
-        FPEXC_ASYNC
-        FPEXC_PRECISE
-        TIMING_STATISTICAL
-        TIMING_TIMESTAMP
-    )],
-'securebits' => [],
-'functions' => [ qw(
-        get_dumpable
-        set_dumpable
-        get_endian
-        set_endian
-        get_fpemu
-        set_fpemu
-        get_fpexc
-        set_fpexc
-        get_name
-        set_name
-        get_pdeathsig
-        set_pdeathsig
-        get_timing
-        set_timing
-    )]
+   'capabilities' => [qw(CAP_AUDIT_CONTROL)],
+   'constants' => [qw(CAP_AUDIT_CONTROL ENDIAN_BIG ENDIAN_LITTLE ENDIAN_PPC_LITTLE FPEMU_NOPRINT FPEMU_SIGFPE FP_EXC_ASYNC FP_EXC_DISABLED FP_EXC_DIV FP_EXC_INV FP_EXC_NONRECOV FP_EXC_OVF FP_EXC_PRECISE FP_EXC_RES FP_EXC_SW_ENABLE FP_EXC_UND MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE SECBIT_KEEP_CAPS SECBIT_KEEP_CAPS_LOCKED SECBIT_NOROOT SECBIT_NOROOT_LOCKED SECBIT_NO_SETUID_FIXUP SECBIT_NO_SETUID_FIXUP_LOCKED SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED SECURE_NOROOT SECURE_NOROOT_LOCKED SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED TIMING_STATISTICAL TIMING_TIMESTAMP TSC_ENABLE TSC_SIGSEGV UNALIGN_NOPRINT UNALIGN_SIGBUS)],
+   'securebits' => [qw(SECBIT_KEEP_CAPS SECBIT_KEEP_CAPS_LOCKED SECBIT_NOROOT SECBIT_NOROOT_LOCKED SECBIT_NO_SETUID_FIXUP SECBIT_NO_SETUID_FIXUP_LOCKED SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED SECURE_NOROOT SECURE_NOROOT_LOCKED SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED)],
+   'functions' => \@from_xs,
 );
 
-# Some functions may not be defined, we want to stay compatible
-# with centos 5, which uses linux 2.6.18. Anything newer than that is
-# guarded with #ifdef's
-for(qw(get_mce_kill set_mce_kill set_ptracer get_seccomp set_seccomp
-    get_securebits set_securebits get_timerslack set_timerslack
-    get_tsc set_tsc get_unalign set_unalign)) {
-    if(__PACKAGE__->can($_)) {
-        push @{$EXPORT_TAGS{functions}}, $_;
-    }
-}
-for(qw(MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE TSC_ENABLE TSC_SIGSEGV
-    UNALIGN_NOPRINT UNALIGN_SIGBUS)) {
-    if(__PACKAGE__->can($_)) {
-        push @{$EXPORT_TAGS{constants}}, $_;
-    }
-}
-
 if(__PACKAGE__->can('get_securebits')) {
-    for(qw(SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED
-         SECURE_NOROOT SECURE_NOROOT_LOCKED
-         SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED)) {
-        push @{$EXPORT_TAGS{securebits}}, $_;
-    }
     require Linux::Prctl::Securebits;
     our $securebits = Linux::Prctl::Securebits->new();
     tie %$securebits, 'Linux::Prctl::Securebits';
@@ -84,6 +32,18 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{constants} },
                    @{ $EXPORT_TAGS{functions} },
                    @{ $EXPORT_TAGS{securebits} } );
 our @EXPORT;
+
+sub AUTOLOAD {
+    my $constname;
+    our $AUTOLOAD;
+    ($constname = $AUTOLOAD) =~ s/.*:://;
+    croak "&Linux::Prctl::constant not defined" if $constname eq 'constant';
+    my ($error, $val) = constant($constname);
+    if ($error) { croak $error; }
+    no strict 'refs';
+    *$AUTOLOAD = sub { $val };
+    goto &$AUTOLOAD;
+}
 
 1;
 
