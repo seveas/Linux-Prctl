@@ -8,6 +8,40 @@ use Fcntl qw(SEEK_SET);
 
 my @constants = qw(
         CAP_AUDIT_CONTROL
+        CAP_AUDIT_WRITE
+        CAP_CHOWN
+        CAP_DAC_OVERRIDE
+        CAP_DAC_READ_SEARCH
+        CAP_FOWNER
+        CAP_FSETID
+        CAP_IPC_LOCK
+        CAP_IPC_OWNER
+        CAP_KILL
+        CAP_LEASE
+        CAP_LINUX_IMMUTABLE
+        CAP_MAC_ADMIN
+        CAP_MAC_OVERRIDE
+        CAP_MKNOD
+        CAP_NET_ADMIN
+        CAP_NET_BIND_SERVICE
+        CAP_NET_BROADCAST
+        CAP_NET_RAW
+        CAP_SETFCAP
+        CAP_SETGID
+        CAP_SETPCAP
+        CAP_SETUID
+        CAP_SYS_ADMIN
+        CAP_SYS_BOOT
+        CAP_SYS_CHROOT
+        CAP_SYSLOG
+        CAP_SYS_MODULE
+        CAP_SYS_NICE
+        CAP_SYS_PACCT
+        CAP_SYS_PTRACE
+        CAP_SYS_RAWIO
+        CAP_SYS_RESOURCE
+        CAP_SYS_TIME
+        CAP_SYS_TTY_CONFIG
         ENDIAN_BIG
         ENDIAN_LITTLE
         ENDIAN_PPC_LITTLE
@@ -80,7 +114,7 @@ close $fh;
 
 my $securebits = join(' ', grep(/^SEC/, @constants));
 my $capabilities = join(' ', grep(/^CAP/, @constants));
-my $constants = join(' ', @constants);
+my $constants = join(' ', grep { $_ !~ /^(SEC|CAP)/} @constants);
 
 open($fh, '+<', 'lib/Linux/Prctl.pm');
 read($fh, $content, 100_000_000);

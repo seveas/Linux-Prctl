@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
-use Linux::Prctl qw(:constants);
+use Test::More tests => 65;
+use Linux::Prctl qw(:constants :securebits :capabilities);
 
 SKIP: {
     open(my $fh, '<', '/usr/include/linux/prctl.h') or
@@ -56,4 +56,51 @@ SKIP: {
     is(Linux::Prctl::SECURE_NOROOT_LOCKED, $consts{SECURE_NOROOT_LOCKED}, "SECURE_NOROOT correctly defined");
     is(Linux::Prctl::SECURE_NO_SETUID_FIXUP, $consts{SECURE_NO_SETUID_FIXUP}, "SECURE_NO_SETUID_FIXUP correctly defined");
     is(Linux::Prctl::SECURE_NO_SETUID_FIXUP_LOCKED, $consts{SECURE_NO_SETUID_FIXUP_LOCKED}, "SECURE_NO_SETUID_FIXUP correctly defined");
+}
+SKIP: {
+    open(my $fh, '<', '/usr/include/linux/capability.h') or
+    skip "capability.h not available", 35;
+
+    my %consts;
+    while(<$fh>) {
+        if(/^#\s*define\s+([A-Z_]+)\s+([0-9]+|0x[0-9a-fA-F]+)(?:\s|$|\/)/) {
+            $consts{$1} = eval($2);
+        }
+    }
+
+    is(Linux::Prctl::CAP_AUDIT_CONTROL, $consts{CAP_AUDIT_CONTROL}, "CAP_AUDIT_CONTROL correctly defined");
+    is(Linux::Prctl::CAP_AUDIT_WRITE, $consts{CAP_AUDIT_WRITE}, "CAP_AUDIT_WRITE correctly defined");
+    is(Linux::Prctl::CAP_CHOWN, $consts{CAP_CHOWN}, "CAP_CHOWN correctly defined");
+    is(Linux::Prctl::CAP_DAC_OVERRIDE, $consts{CAP_DAC_OVERRIDE}, "CAP_DAC_OVERRIDE correctly defined");
+    is(Linux::Prctl::CAP_DAC_READ_SEARCH, $consts{CAP_DAC_READ_SEARCH}, "CAP_DAC_READ_SEARCH correctly defined");
+    is(Linux::Prctl::CAP_FOWNER, $consts{CAP_FOWNER}, "CAP_FOWNER correctly defined");
+    is(Linux::Prctl::CAP_FSETID, $consts{CAP_FSETID}, "CAP_FSETID correctly defined");
+    is(Linux::Prctl::CAP_IPC_LOCK, $consts{CAP_IPC_LOCK}, "CAP_IPC_LOCK correctly defined");
+    is(Linux::Prctl::CAP_IPC_OWNER, $consts{CAP_IPC_OWNER}, "CAP_IPC_OWNER correctly defined");
+    is(Linux::Prctl::CAP_KILL, $consts{CAP_KILL}, "CAP_KILL correctly defined");
+    is(Linux::Prctl::CAP_LEASE, $consts{CAP_LEASE}, "CAP_LEASE correctly defined");
+    is(Linux::Prctl::CAP_LINUX_IMMUTABLE, $consts{CAP_LINUX_IMMUTABLE}, "CAP_LINUX_IMMUTABLE correctly defined");
+    is(Linux::Prctl::CAP_MAC_ADMIN, $consts{CAP_MAC_ADMIN}, "CAP_MAC_ADMIN correctly defined");
+    is(Linux::Prctl::CAP_MAC_OVERRIDE, $consts{CAP_MAC_OVERRIDE}, "CAP_MAC_OVERRIDE correctly defined");
+    is(Linux::Prctl::CAP_MKNOD, $consts{CAP_MKNOD}, "CAP_MKNOD correctly defined");
+    is(Linux::Prctl::CAP_NET_ADMIN, $consts{CAP_NET_ADMIN}, "CAP_NET_ADMIN correctly defined");
+    is(Linux::Prctl::CAP_NET_BIND_SERVICE, $consts{CAP_NET_BIND_SERVICE}, "CAP_NET_BIND_SERVICE correctly defined");
+    is(Linux::Prctl::CAP_NET_BROADCAST, $consts{CAP_NET_BROADCAST}, "CAP_NET_BROADCAST correctly defined");
+    is(Linux::Prctl::CAP_NET_RAW, $consts{CAP_NET_RAW}, "CAP_NET_RAW correctly defined");
+    is(Linux::Prctl::CAP_SETFCAP, $consts{CAP_SETFCAP}, "CAP_SETFCAP correctly defined");
+    is(Linux::Prctl::CAP_SETGID, $consts{CAP_SETGID}, "CAP_SETGID correctly defined");
+    is(Linux::Prctl::CAP_SETPCAP, $consts{CAP_SETPCAP}, "CAP_SETPCAP correctly defined");
+    is(Linux::Prctl::CAP_SETUID, $consts{CAP_SETUID}, "CAP_SETUID correctly defined");
+    is(Linux::Prctl::CAP_SYSLOG, $consts{CAP_SYSLOG}, "CAP_SYSLOG correctly defined");
+    is(Linux::Prctl::CAP_SYS_ADMIN, $consts{CAP_SYS_ADMIN}, "CAP_SYS_ADMIN correctly defined");
+    is(Linux::Prctl::CAP_SYS_BOOT, $consts{CAP_SYS_BOOT}, "CAP_SYS_BOOT correctly defined");
+    is(Linux::Prctl::CAP_SYS_CHROOT, $consts{CAP_SYS_CHROOT}, "CAP_SYS_CHROOT correctly defined");
+    is(Linux::Prctl::CAP_SYS_MODULE, $consts{CAP_SYS_MODULE}, "CAP_SYS_MODULE correctly defined");
+    is(Linux::Prctl::CAP_SYS_NICE, $consts{CAP_SYS_NICE}, "CAP_SYS_NICE correctly defined");
+    is(Linux::Prctl::CAP_SYS_PACCT, $consts{CAP_SYS_PACCT}, "CAP_SYS_PACCT correctly defined");
+    is(Linux::Prctl::CAP_SYS_PTRACE, $consts{CAP_SYS_PTRACE}, "CAP_SYS_PTRACE correctly defined");
+    is(Linux::Prctl::CAP_SYS_RAWIO, $consts{CAP_SYS_RAWIO}, "CAP_SYS_RAWIO correctly defined");
+    is(Linux::Prctl::CAP_SYS_RESOURCE, $consts{CAP_SYS_RESOURCE}, "CAP_SYS_RESOURCE correctly defined");
+    is(Linux::Prctl::CAP_SYS_TIME, $consts{CAP_SYS_TIME}, "CAP_SYS_TIME correctly defined");
+    is(Linux::Prctl::CAP_SYS_TTY_CONFIG, $consts{CAP_SYS_TTY_CONFIG}, "CAP_SYS_TTY_CONFIG correctly defined");
 }

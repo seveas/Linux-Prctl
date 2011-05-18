@@ -279,3 +279,21 @@ get_unalign()
     OUTPUT:
         RETVAL
 
+#ifdef PR_CAPBSET_DROP
+int
+capbset_drop(cap)
+    int cap
+    CODE:
+        RETVAL = prctl(PR_CAPBSET_DROP, cap, 0, 0, 0);
+    OUTPUT:
+        RETVAL
+
+int
+capbset_read(cap)
+    int cap
+    CODE:
+        RETVAL = prctl(PR_CAPBSET_READ, cap, 0, 0, 0);
+    OUTPUT:
+        RETVAL
+
+#endif
