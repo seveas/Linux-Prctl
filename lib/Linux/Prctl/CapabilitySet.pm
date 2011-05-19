@@ -1,9 +1,9 @@
-package Linux::Prctl::CapabilityBoundingSet;
-use Linux::Prctl;
+package Linux::Prctl::CapabilitySet;
 
 use strict;
 use warnings;
 
+use Linux::Prctl;
 use Tie::Hash;
 use Carp qw(croak);
 
@@ -11,8 +11,9 @@ use vars qw(@ISA);
 @ISA = qw(Tie::StdHash);
 
 sub TIEHASH {
-    my ($class) = @_;
-    my $self = {};
+    my ($class, $error, $flag) = @_;
+    if ($error) { croak $error; }
+    my $self = {__flag => $flag};
     return bless($self, $class);
 }
 
@@ -24,28 +25,26 @@ sub cap {
     return $val
 }
 
-# Use ->can as the function may not be defined
-sub capbset_drop {
+sub set_cap {
     shift;
-    return Linux::Prctl->can('capbset_drop')->(@_);
+    return Linux::Prctl->can('set_cap')->(@_);
 }
 
-sub capbset_read {
+sub get_cap {
     shift;
-    return Linux::Prctl->can('capbset_read')->(@_);
+    return Linux::Prctl->can('get_cap')->(@_);
 }
 
 sub STORE {
     my ($self, $key, $value) = @_;
     $key = $self->cap($key);
-    croak("Can only drop capabilities from the bounding set, not add them") if $value;
-    $self->capbset_drop($key);
+    $self->set_cap($self->{__flag}, $key, $value);
 }
 
 sub FETCH {
     my ($self, $key) = @_;
     $key = $self->cap($key);
-    return $self->capbset_read($key) ? 1 : 0;
+    return $self->get_cap($self->{__flag}, $key);
 }
 
 1;

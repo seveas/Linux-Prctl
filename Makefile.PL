@@ -7,6 +7,9 @@ use ExtUtils::Constant qw(WriteConstants);
 use Fcntl qw(SEEK_SET);
 
 my @constants = qw(
+        CAP_EFFECTIVE
+        CAP_INHERITABLE
+        CAP_PERMITTED
         CAP_AUDIT_CONTROL
         CAP_AUDIT_WRITE
         CAP_CHOWN
@@ -92,7 +95,7 @@ WriteMakefile(
     ($] >= 5.005 ?
       (ABSTRACT_FROM  => 'lib/Linux/Prctl.pm',
        AUTHOR         => 'Dennis Kaarsemaker <dennis@kaarsemaker.net>') : ()),
-    LIBS              => [''],
+    LIBS              => ['-lcap'],
     DEFINE            => '',
     INC               => '',
 );
@@ -113,8 +116,8 @@ close $fh;
 # Make sure all constants are known to Prctl.pm
 
 my $securebits = join(' ', grep(/^SEC/, @constants));
-my $capabilities = join(' ', grep(/^CAP/, @constants));
-my $constants = join(' ', grep { $_ !~ /^(SEC|CAP)/} @constants);
+my $capabilities = join(' ', grep(/^CAP_(?!PERMITTED|EFFECTIVE|INHERITABLE)/, @constants));
+my $constants = join(' ', grep { $_ !~ /^(SEC|CAP)/} @constants) . ' CAP_PERMITTED CAP_EFFECTIVE CAP_INHERITABLE';
 
 open($fh, '+<', 'lib/Linux/Prctl.pm');
 read($fh, $content, 100_000_000);

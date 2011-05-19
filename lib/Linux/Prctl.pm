@@ -4,6 +4,10 @@ use 5.008005;
 use strict;
 use warnings;
 
+use Linux::Prctl::Securebits;
+use Linux::Prctl::CapabilityBoundingSet;
+use Linux::Prctl::CapabilitySet;
+
 our $VERSION = '0.50';
 
 require XSLoader;
@@ -17,22 +21,17 @@ use Carp qw(croak);
 
 our %EXPORT_TAGS = (
    'capabilities' => [qw(CAP_AUDIT_CONTROL CAP_AUDIT_WRITE CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID CAP_IPC_LOCK CAP_IPC_OWNER CAP_KILL CAP_LEASE CAP_LINUX_IMMUTABLE CAP_MAC_ADMIN CAP_MAC_OVERRIDE CAP_MKNOD CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_BROADCAST CAP_NET_RAW CAP_SETFCAP CAP_SETGID CAP_SETPCAP CAP_SETUID CAP_SYS_ADMIN CAP_SYS_BOOT CAP_SYS_CHROOT CAP_SYSLOG CAP_SYS_MODULE CAP_SYS_NICE CAP_SYS_PACCT CAP_SYS_PTRACE CAP_SYS_RAWIO CAP_SYS_RESOURCE CAP_SYS_TIME CAP_SYS_TTY_CONFIG)],
-   'constants' => [qw(ENDIAN_BIG ENDIAN_LITTLE ENDIAN_PPC_LITTLE FPEMU_NOPRINT FPEMU_SIGFPE FP_EXC_ASYNC FP_EXC_DISABLED FP_EXC_DIV FP_EXC_INV FP_EXC_NONRECOV FP_EXC_OVF FP_EXC_PRECISE FP_EXC_RES FP_EXC_SW_ENABLE FP_EXC_UND MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE TIMING_STATISTICAL TIMING_TIMESTAMP TSC_ENABLE TSC_SIGSEGV UNALIGN_NOPRINT UNALIGN_SIGBUS)],
+   'constants' => [qw(ENDIAN_BIG ENDIAN_LITTLE ENDIAN_PPC_LITTLE FPEMU_NOPRINT FPEMU_SIGFPE FP_EXC_ASYNC FP_EXC_DISABLED FP_EXC_DIV FP_EXC_INV FP_EXC_NONRECOV FP_EXC_OVF FP_EXC_PRECISE FP_EXC_RES FP_EXC_SW_ENABLE FP_EXC_UND MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE TIMING_STATISTICAL TIMING_TIMESTAMP TSC_ENABLE TSC_SIGSEGV UNALIGN_NOPRINT UNALIGN_SIGBUS CAP_PERMITTED CAP_EFFECTIVE CAP_INHERITABLE)],
    'securebits' => [qw(SECBIT_KEEP_CAPS SECBIT_KEEP_CAPS_LOCKED SECBIT_NOROOT SECBIT_NOROOT_LOCKED SECBIT_NO_SETUID_FIXUP SECBIT_NO_SETUID_FIXUP_LOCKED SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED SECURE_NOROOT SECURE_NOROOT_LOCKED SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED)],
    'functions' => \@from_xs,
 );
 
-if(__PACKAGE__->can('get_securebits')) {
-    require Linux::Prctl::Securebits;
-    our $securebits = Linux::Prctl::Securebits->new();
-    tie %$securebits, 'Linux::Prctl::Securebits';
-}
-
-if(__PACKAGE__->can('capbset_drop')) {
-    require Linux::Prctl::CapabilityBoundingSet;
-    our $capbset = Linux::Prctl::CapabilityBoundingSet->new();
-    tie %$capbset, 'Linux::Prctl::CapabilityBoundingSet';
-}
+our (%securebits, %capbset, %cap_effective, %cap_inheritable, %cap_permitted);
+tie %securebits, 'Linux::Prctl::Securebits';
+tie %capbset, 'Linux::Prctl::CapabilityBoundingSet';
+tie %cap_effective, 'Linux::Prctl::CapabilitySet', constant('CAP_EFFECTIVE');
+tie %cap_inheritable, 'Linux::Prctl::CapabilitySet', constant('CAP_INHERITABLE');
+tie %cap_permitted, 'Linux::Prctl::CapabilitySet', constant('CAP_PERMITTED');
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{constants} },
                    @{ $EXPORT_TAGS{functions} },
@@ -279,14 +278,14 @@ Return unaligned access control bits, see set_unalign.
 Set the "securebits" flags of the calling thread.
 
 It is not recommended to use this function directly, use the
-Linux::Prctl::Securebits object instead.
+%Linux::Prctl::securebits hash instead.
 
 =head3 get_securebits()
 
 Get the "securebits" flags of the calling thread.
 
 As with set_securebits, it is not recommended to use this function directly,
-use the $Linux::Prctl::Securebits object instead.
+use the %Linux::Prctl::securebits hash instead.
 
 =head3 capbset_read(capability)
 
@@ -296,7 +295,7 @@ receive the capability through a file's permitted capability set on a
 subsequent call to execve.
 
 It is not recommended to use this function directly, use the
-$Linux::Prctl::cap_* hashes instead.
+%Linux::Prctl::cap_* hashes instead.
 
 =head3 capbset_drop(capability)
 
@@ -305,7 +304,7 @@ capability specified by from  the  calling  thread's capability bounding set.
 Any children of the calling thread will inherit the newly reduced bounding set.
 
 As with capbset_read, it is not recommended to use this function directly, use
-the $Linux::Prctl::cap_* hashes instead.
+the %Linux::Prctl::cap_* hashes instead.
 
 =head2 Capabilities and the capability bounding set
 
@@ -324,7 +323,7 @@ independently enabled and disabled. Capabilities are a per-thread attribute.
 Each thread has three capability sets containing zero or  more  of  the
 capabilities described below
 
-=head3 Permitted (the $Linux::Prctl::cap_permitted hash):
+=head3 Permitted (the %Linux::Prctl::cap_permitted hash):
 
 This is a limiting superset for the effective capabilities that the thread may
 assume. It is also a limiting superset for the capabilities that may be added
@@ -335,13 +334,13 @@ If a thread drops a capability from its permitted set, it can never re-acquire
 that capability (unless it execve s either a set-user-ID-root program, or a
 program whose associated file capabilities grant that capability).
 
-=head3 Inheritabe (the $Linux::Prctl::cap_inheritable hash):
+=head3 Inheritabe (the %Linux::Prctl::cap_inheritable hash):
 
 This is a set of capabilities preserved across an execve. It provides a
 mechanism for a process to assign capabilities to the permitted set of the new
 program during an execve.
 
-=head3 Effective (the $Linux::Prctl::cap_effective hash):
+=head3 Effective (the %Linux::Prctl::cap_effective hash):
 
 This is the set of capabilities used by the kernel to perform permission checks
 for the thread.
@@ -350,11 +349,11 @@ A child created via fork inherits copies of its parent's capability sets. See
 L<capabilities(7)> for a discussion of the treatment of capabilities during
 execve.
 
-The cap_* hashes represent the current capability bounding sets of the process.
-The capability bounding set dictates whether the process can receive the
-capability through a file's permitted capability set on a subsequent call to
-execve. All items of these hashes are true by default, unless a parent process
-already removed them from the bounding set.
+The $Linux::Prctl::capbset hash represents the current capability bounding sets
+of the process.  The capability bounding set dictates whether the process can
+receive the capability through a file's permitted capability set on a
+subsequent call to execve. All items of this hash are true by default, unless a
+parent process already removed them from the bounding set.
 
 These four hashes have a number of keys. For the capability bounding set and
 the effective capabilities, these can only be set to False, this drops them

@@ -1,12 +1,16 @@
 package Linux::Prctl::Securebits;
+
+use strict;
+use warnings;
+
+use Linux::Prctl;
 use Tie::Hash;
 use Carp qw(croak);
 
 use vars qw(@ISA);
 @ISA = qw(Tie::StdHash);
 
-sub new {
-    require Linux::Prctl;
+sub TIEHASH {
     my ($class) = @_;
     my $self = {};
     return bless($self, $class);
@@ -14,8 +18,10 @@ sub new {
 
 sub bit {
     my ($self, $bit) = @_;
-    croak("Unknown secbit: $bit") unless $bit =~ /^(keep_caps|noroot|no_setuid_fixup)(locked)?/;
-    return Linux::Prctl::constant('SECBIT_' . uc($bit));
+    croak("Unknown secbit: $bit") unless $bit =~ /^(keep_caps|noroot|no_setuid_fixup)(_locked)?/;
+    my ($error, $val) =  Linux::Prctl::constant('SECBIT_' . uc($bit));
+    if ($error) { croak $error; }
+    return $val
 }
 
 sub set_securebits {

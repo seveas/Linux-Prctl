@@ -22,4 +22,5 @@ t/tsc.t
 t/unalign.t
 lib/Linux/Prctl.pm
 lib/Linux/Prctl/CapabilityBoundingSet.pm
+lib/Linux/Prctl/CapabilitySet.pm
 lib/Linux/Prctl/Securebits.pm

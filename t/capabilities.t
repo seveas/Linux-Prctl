@@ -1,0 +1,32 @@
+use strict;
+use warnings;
+
+use Test::More tests => 283;
+use Linux::Prctl qw(:constants);
+
+SKIP: {
+    is(defined(tied %Linux::Prctl::cap_permitted), 1, "Have a tied cap_permitted object");
+    is(defined(tied %Linux::Prctl::cap_effective), 1, "Have a tied cap_effective object");
+    is(defined(tied %Linux::Prctl::cap_inheritable), 1, "Have a tied cap_inheritable object");
+    my $R = $< ? 0 : 1;
+    for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
+        s/^CAP_//;
+        $_ = lc($_);
+        is($Linux::Prctl::cap_permitted{$_}, $R, "Checking whether $_ is set in cap_permitted");
+        is($Linux::Prctl::cap_effective{$_}, $R, "Checking whether $_ is set in cap_effective");
+        is($Linux::Prctl::cap_inheritable{$_}, 0, "Checking whether $_ is set in cap_inheritable");
+
+        $Linux::Prctl::cap_inheritable{$_} = 1;
+        is($Linux::Prctl::cap_inheritable{$_}, $R, "Checking whether $_ is set to $R in cap_inheritable");
+
+        $Linux::Prctl::cap_effective{$_} = 0;
+        is($Linux::Prctl::cap_effective{$_}, 0, "Checking whether $_ is set to 0 in cap_effective");
+        $Linux::Prctl::cap_effective{$_} = 1;
+        is($Linux::Prctl::cap_effective{$_}, $R, "Checking whether $_ is set to $R in cap_effective");
+
+        $Linux::Prctl::cap_permitted{$_} = 0;
+        is($Linux::Prctl::cap_permitted{$_}, 1, "Checking whether $_ is set to $R in cap_permitted");
+        $Linux::Prctl::cap_permitted{$_} = 1;
+        is($Linux::Prctl::cap_permitted{$_}, 1, "Checking whether $_ is set to $R in cap_permitted");
+    }
+}

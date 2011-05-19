@@ -4,12 +4,15 @@
 #include "ppport.h"
 #include "securebits.h"
 
+#include <errno.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>
 #include <stdio.h>
 #include <unistd.h>
 
-
+#define CAP_EFFECTIVE 0
+#define CAP_PERMITTED 1
+#define CAP_INHERITABLE 2
 #include "const-c.inc"
 
 #ifdef PR_SET_PTRACER
@@ -91,11 +94,16 @@ set_fpexc(fpexc)
     OUTPUT:
         RETVAL
 
-# New in 2.6.32, but named and implemented inconsistently. The linux
-# implementation has two ways of setting the policy to the default, and thus
-# needs an extra argument. We ignore the first argument and always all
-# PR_MCE_KILL_SET. This makes our implementation simpler and keeps the prctl
-# interface more consistent
+=for comment
+
+New in 2.6.32, but named and implemented inconsistently. The linux
+implementation has two ways of setting the policy to the default, and thus
+needs an extra argument. We ignore the first argument and always all
+PR_MCE_KILL_SET. This makes our implementation simpler and keeps the prctl
+interface more consistent
+
+=cut
+
 #ifdef PR_MCE_KILL
 #define PR_GET_MCE_KILL PR_MCE_KILL_GET
 #define PR_SET_MCE_KILL PR_MCE_KILL
@@ -297,3 +305,33 @@ capbset_read(cap)
         RETVAL
 
 #endif
+
+int
+get_cap(flag, cap)
+    int flag
+    int cap
+    CODE:
+        cap_flag_value_t isset;
+        cap_t caps = cap_get_proc();
+        if(cap_get_flag(caps, (cap_value_t)cap, (cap_flag_t)flag, &isset) == -1)
+            croak("cap_get_flag failed: %s", strerror(errno));
+        cap_free(caps);
+        RETVAL = isset;
+    OUTPUT:
+        RETVAL
+
+int
+set_cap(flag, cap, val)
+    int flag
+    int cap
+    int val
+    CODE:
+        cap_flag_value_t isset;
+        cap_t caps = cap_get_proc();
+        if(cap_set_flag(caps, (cap_flag_t)flag, 1, (const cap_value_t *)&cap, (cap_flag_value_t)val) == -1)
+            croak("cap_set_flag failed: %s", strerror(errno));
+        cap_set_proc(caps);
+        cap_free(caps);
+        RETVAL = isset;
+    OUTPUT:
+        RETVAL
