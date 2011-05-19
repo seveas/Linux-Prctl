@@ -6,6 +6,8 @@ README
 securebits.h
 t/01-use.t
 t/02-constants.t
+t/capabilities.t
+t/capbset.t
 t/dumpable.t
 t/endian.t
 t/fpemu.t
