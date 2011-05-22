@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 65;
+use Test::More tests => 64;
 use Linux::Prctl qw(:constants :securebits :capabilities);
 
 SKIP: {
@@ -91,7 +91,6 @@ SKIP: {
     is(Linux::Prctl::CAP_SETGID, $consts{CAP_SETGID}, "CAP_SETGID correctly defined");
     is(Linux::Prctl::CAP_SETPCAP, $consts{CAP_SETPCAP}, "CAP_SETPCAP correctly defined");
     is(Linux::Prctl::CAP_SETUID, $consts{CAP_SETUID}, "CAP_SETUID correctly defined");
-    is(Linux::Prctl::CAP_SYSLOG, $consts{CAP_SYSLOG}, "CAP_SYSLOG correctly defined");
     is(Linux::Prctl::CAP_SYS_ADMIN, $consts{CAP_SYS_ADMIN}, "CAP_SYS_ADMIN correctly defined");
     is(Linux::Prctl::CAP_SYS_BOOT, $consts{CAP_SYS_BOOT}, "CAP_SYS_BOOT correctly defined");
     is(Linux::Prctl::CAP_SYS_CHROOT, $consts{CAP_SYS_CHROOT}, "CAP_SYS_CHROOT correctly defined");

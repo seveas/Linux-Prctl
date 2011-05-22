@@ -36,7 +36,6 @@ my @constants = qw(
         CAP_SYS_ADMIN
         CAP_SYS_BOOT
         CAP_SYS_CHROOT
-        CAP_SYSLOG
         CAP_SYS_MODULE
         CAP_SYS_NICE
         CAP_SYS_PACCT

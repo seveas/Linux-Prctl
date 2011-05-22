@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 283;
+use Test::More tests => 275;
 use Linux::Prctl qw(:constants);
 
 SKIP: {
