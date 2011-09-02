@@ -1,4 +1,5 @@
 use strict;
+no strict 'subs';
 use warnings;
 
 use Test::More tests => 3;
@@ -12,7 +13,7 @@ SKIP: {
     my $pid = fork;
     unless($pid) {
         set_seccomp(1);
-        get_seccomp; # This will result in a SIGKILL
+        get_seccomp(); # This will result in a SIGKILL
         exit; # So this should never happen
     }
     waitpid $pid, 0;

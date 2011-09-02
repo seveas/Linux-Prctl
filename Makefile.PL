@@ -94,7 +94,7 @@ WriteMakefile(
     ($] >= 5.005 ?
       (ABSTRACT_FROM  => 'lib/Linux/Prctl.pm',
        AUTHOR         => 'Dennis Kaarsemaker <dennis@kaarsemaker.net>') : ()),
-    LIBS              => ['-lcap'],
+    LIBS              => ['-L/lib -lcap'],
     DEFINE            => '',
     INC               => '',
 );

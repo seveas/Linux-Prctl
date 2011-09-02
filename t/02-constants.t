@@ -30,13 +30,13 @@ SKIP: {
     is(Linux::Prctl::FP_EXC_NONRECOV, $consts{PR_FP_EXC_NONRECOV}, "FPEXC_NONRECOV correctly defined");
     is(Linux::Prctl::FP_EXC_ASYNC, $consts{PR_FP_EXC_ASYNC}, "FPEXC_ASYNC correctly defined");
     is(Linux::Prctl::FP_EXC_PRECISE, $consts{PR_FP_EXC_PRECISE}, "FPEXC_PRECISE correctly defined");
-    is(Linux::Prctl::MCE_KILL_DEFAULT, $consts{PR_MCE_KILL_DEFAULT}, "MCE_KILL_DEFAULT correctly defined");
-    is(Linux::Prctl::MCE_KILL_EARLY, $consts{PR_MCE_KILL_EARLY}, "MCE_KILL_EARLY correctly defined");
-    is(Linux::Prctl::MCE_KILL_LATE, $consts{PR_MCE_KILL_LATE}, "MCE_KILL_LATE correctly defined");
+    eval{is(Linux::Prctl::MCE_KILL_DEFAULT, $consts{PR_MCE_KILL_DEFAULT}, "MCE_KILL_DEFAULT correctly defined"); 1} or pass "MCE_KILL_DEFAULT not defined";
+    eval{is(Linux::Prctl::MCE_KILL_EARLY, $consts{PR_MCE_KILL_EARLY}, "MCE_KILL_EARLY correctly defined"); 1} or pass "MCE_KILL_EARLY not defined";
+    eval{is(Linux::Prctl::MCE_KILL_LATE, $consts{PR_MCE_KILL_LATE}, "MCE_KILL_LATE correctly defined"); 1} or pass "MCE_KILL_LATE not defined";
     is(Linux::Prctl::TIMING_STATISTICAL, $consts{PR_TIMING_STATISTICAL}, "TIMING_STATISTICAL correctly defined");
     is(Linux::Prctl::TIMING_TIMESTAMP, $consts{PR_TIMING_TIMESTAMP}, "TIMING_TIMESTAMP correctly defined");
-    is(Linux::Prctl::TSC_ENABLE, $consts{PR_TSC_ENABLE}, "TSC_ENABLE correctly defined");
-    is(Linux::Prctl::TSC_SIGSEGV, $consts{PR_TSC_SIGSEGV}, "TSC_SIGSEGV correctly defined");
+    eval{is(Linux::Prctl::TSC_ENABLE, $consts{PR_TSC_ENABLE}, "TSC_ENABLE correctly defined"); 1} or pass "TSC_ENABLE not defined";
+    eval{is(Linux::Prctl::TSC_SIGSEGV, $consts{PR_TSC_SIGSEGV}, "TSC_SIGSEGV correctly defined"); 1} or pass "TSC_SIGSEGV not defined";
     is(Linux::Prctl::UNALIGN_NOPRINT, $consts{PR_UNALIGN_NOPRINT}, "UNALIGN_NOPRINT correctly defined");
     is(Linux::Prctl::UNALIGN_SIGBUS, $consts{PR_UNALIGN_SIGBUS}, "UNALIGN_SIGBUS correctly defined");
 }
@@ -80,14 +80,14 @@ SKIP: {
     is(Linux::Prctl::CAP_KILL, $consts{CAP_KILL}, "CAP_KILL correctly defined");
     is(Linux::Prctl::CAP_LEASE, $consts{CAP_LEASE}, "CAP_LEASE correctly defined");
     is(Linux::Prctl::CAP_LINUX_IMMUTABLE, $consts{CAP_LINUX_IMMUTABLE}, "CAP_LINUX_IMMUTABLE correctly defined");
-    is(Linux::Prctl::CAP_MAC_ADMIN, $consts{CAP_MAC_ADMIN}, "CAP_MAC_ADMIN correctly defined");
-    is(Linux::Prctl::CAP_MAC_OVERRIDE, $consts{CAP_MAC_OVERRIDE}, "CAP_MAC_OVERRIDE correctly defined");
+    eval{is(Linux::Prctl::CAP_MAC_ADMIN, $consts{CAP_MAC_ADMIN}, "CAP_MAC_ADMIN correctly defined"); 1} or pass "CAP_MAC_ADMIN not defined";
+    eval{is(Linux::Prctl::CAP_MAC_OVERRIDE, $consts{CAP_MAC_OVERRIDE}, "CAP_MAC_OVERRIDE correctly defined"); 1} or pass "CAP_MAC_OVERRIDE not defined";
     is(Linux::Prctl::CAP_MKNOD, $consts{CAP_MKNOD}, "CAP_MKNOD correctly defined");
     is(Linux::Prctl::CAP_NET_ADMIN, $consts{CAP_NET_ADMIN}, "CAP_NET_ADMIN correctly defined");
     is(Linux::Prctl::CAP_NET_BIND_SERVICE, $consts{CAP_NET_BIND_SERVICE}, "CAP_NET_BIND_SERVICE correctly defined");
     is(Linux::Prctl::CAP_NET_BROADCAST, $consts{CAP_NET_BROADCAST}, "CAP_NET_BROADCAST correctly defined");
     is(Linux::Prctl::CAP_NET_RAW, $consts{CAP_NET_RAW}, "CAP_NET_RAW correctly defined");
-    is(Linux::Prctl::CAP_SETFCAP, $consts{CAP_SETFCAP}, "CAP_SETFCAP correctly defined");
+    eval{is(Linux::Prctl::CAP_SETFCAP, $consts{CAP_SETFCAP}, "CAP_SETFCAP correctly defined"); 1} or pass "CAP_SETFCAP not defined";
     is(Linux::Prctl::CAP_SETGID, $consts{CAP_SETGID}, "CAP_SETGID correctly defined");
     is(Linux::Prctl::CAP_SETPCAP, $consts{CAP_SETPCAP}, "CAP_SETPCAP correctly defined");
     is(Linux::Prctl::CAP_SETUID, $consts{CAP_SETUID}, "CAP_SETUID correctly defined");

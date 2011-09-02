@@ -1,4 +1,5 @@
 use strict;
+no strict 'subs';
 use warnings;
 
 use Test::More tests => 20;
