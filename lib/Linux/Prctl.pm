@@ -8,7 +8,7 @@ use Linux::Prctl::Securebits;
 use Linux::Prctl::CapabilityBoundingSet;
 use Linux::Prctl::CapabilitySet;
 
-our $VERSION = '1.3.3';
+our $VERSION = '1.4.0';
 
 require XSLoader;
 my @noexport = keys %Linux::Prctl::;
@@ -20,7 +20,7 @@ our @ISA = qw(Exporter);
 use Carp qw(croak);
 
 our %EXPORT_TAGS = (
-   'capabilities' => [qw(CAP_AUDIT_CONTROL CAP_AUDIT_WRITE CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID CAP_IPC_LOCK CAP_IPC_OWNER CAP_KILL CAP_LEASE CAP_LINUX_IMMUTABLE CAP_MAC_ADMIN CAP_MAC_OVERRIDE CAP_MKNOD CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_BROADCAST CAP_NET_RAW CAP_SETFCAP CAP_SETGID CAP_SETPCAP CAP_SETUID CAP_SYS_ADMIN CAP_SYS_BOOT CAP_SYS_CHROOT CAP_SYS_MODULE CAP_SYS_NICE CAP_SYS_PACCT CAP_SYS_PTRACE CAP_SYS_RAWIO CAP_SYS_RESOURCE CAP_SYS_TIME CAP_SYS_TTY_CONFIG)],
+   'capabilities' => [qw(CAP_AUDIT_CONTROL CAP_AUDIT_WRITE CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID CAP_IPC_LOCK CAP_IPC_OWNER CAP_KILL CAP_LEASE CAP_LINUX_IMMUTABLE CAP_MAC_ADMIN CAP_MAC_OVERRIDE CAP_MKNOD CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_BROADCAST CAP_NET_RAW CAP_SETFCAP CAP_SETGID CAP_SETPCAP CAP_SETUID CAP_SYSLOG CAP_SYS_ADMIN CAP_SYS_BOOT CAP_SYS_CHROOT CAP_SYS_MODULE CAP_SYS_NICE CAP_SYS_PACCT CAP_SYS_PTRACE CAP_SYS_RAWIO CAP_SYS_RESOURCE CAP_SYS_TIME CAP_SYS_TTY_CONFIG CAP_WAKE_ALARM)],
    'constants' => [qw(ENDIAN_BIG ENDIAN_LITTLE ENDIAN_PPC_LITTLE FPEMU_NOPRINT FPEMU_SIGFPE FP_EXC_ASYNC FP_EXC_DISABLED FP_EXC_DIV FP_EXC_INV FP_EXC_NONRECOV FP_EXC_OVF FP_EXC_PRECISE FP_EXC_RES FP_EXC_SW_ENABLE FP_EXC_UND MCE_KILL_DEFAULT MCE_KILL_EARLY MCE_KILL_LATE TIMING_STATISTICAL TIMING_TIMESTAMP TSC_ENABLE TSC_SIGSEGV UNALIGN_NOPRINT UNALIGN_SIGBUS CAP_PERMITTED CAP_EFFECTIVE CAP_INHERITABLE)],
    'securebits' => [qw(SECBIT_KEEP_CAPS SECBIT_KEEP_CAPS_LOCKED SECBIT_NOROOT SECBIT_NOROOT_LOCKED SECBIT_NO_SETUID_FIXUP SECBIT_NO_SETUID_FIXUP_LOCKED SECURE_KEEP_CAPS SECURE_KEEP_CAPS_LOCKED SECURE_NOROOT SECURE_NOROOT_LOCKED SECURE_NO_SETUID_FIXUP SECURE_NO_SETUID_FIXUP_LOCKED)],
    'functions' => \@from_xs,
@@ -346,8 +346,7 @@ This is the set of capabilities used by the kernel to perform permission checks
 for the thread.
 
 A child created via fork inherits copies of its parent's capability sets. See
-L<capabilities(7)> for a discussion of the treatment of capabilities during
-execve.
+below for a discussion of the treatment of capabilities during :func:`execve`.
 
 The $Linux::Prctl::capbset hash represents the current capability bounding sets
 of the process.  The capability bounding set dictates whether the process can
@@ -493,6 +492,13 @@ Make arbitrary manipulations of process UIDs (setuid, setreuid, setresuid,
 setfsuid); make forged UID when passing socket credentials via Unix domain
 sockets.
 
+=head3 syslog
+
+Allow configuring the kernel's syslog (printk behaviour). Before linux 2.6.38
+the sys_admin capability was needed for this.
+
+This is only available in linux 2.6.38 and newer.
+
 =head3 sys_admin
 
 =over 1
@@ -598,6 +604,12 @@ clock.
 
 Use vhangup.
 
+=head3 wake_alarm
+
+Allow triggering something that will wake the system.
+
+This is only available in linux 3.0 and newer
+
 The four capabilities hashes also have two additional methods, to make dropping
 many capabilities at the same time easier:
 
@@ -612,6 +624,44 @@ Drop all but the given capabilities from the set.
 These function accept both names of capabilities as given above and the CAP_
 constants as defined in capabilities.h. These constants are available as
 CAP_SYS_ADMIN et cetera.
+
+=head2 Capabilities and execve
+
+During an L<execve(2)>, the kernel calculates the new capabilities of the
+process using the following algorithm:
+
+* P'(permitted) = (P(inheritable) & F(inheritable)) | (F(permitted) & cap_bset)
+* P'(effective) = F(effective) ? P'(permitted) : 0
+* P'(inheritable) = P(inheritable) [i.e., unchanged]
+
+Where:
+
+* P denotes the value of a thread capability set before the execve
+* P' denotes the value of a capability set after the execve
+* F denotes a file capability set
+* cap_bset is the value of the capability bounding set
+
+The downside of this is that you need to set file capabilities if you want to
+make applications capabilities-friendly via wrappers. For instance, to allow an
+http daemon to listen on port 80 without it needing root privileges, you could
+do the following:
+
+ %Linux::Prctl.cap_inheritable{net_bind_service} = 1;
+ $< = 1000;
+ exec "/usr/sbin/httpd";
+
+This only works if /usr/sbin/httpd has CAP_NET_BIND_SOCK in its inheritable and
+effective sets. You can do this with the L<setcap(8)> tool shipped with libcap.
+
+ $ sudo setcap cap_net_bind_service=ie /usr/sbin/httpd
+ $ getcap /usr/sbin/httpd
+ /usr/sbin/httpd = cap_net_bind_service+ei
+
+Note that it only sets the capability in the inheritable set, so this
+capability is only granted if the program calling execve has it in its
+inheritable set too. The effective set of file capabilities does not exist in
+linux, it is a single bit that specifies whether capabilities in the permitted
+set are automatically raised in the effective set upon execve.
 
 =head2 Establishing a capabilities-only environment with securebits
 

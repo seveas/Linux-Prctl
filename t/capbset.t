@@ -1,11 +1,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 69;
+use Test::More tests => 73;
 use Linux::Prctl qw(:constants);
 
 SKIP: {
-    skip "capbset_drop not available", 35 unless Linux::Prctl->can('capbset_drop');
+    skip "capbset_drop not available", 37 unless Linux::Prctl->can('capbset_drop');
     is(defined(tied %Linux::Prctl::capbset), 1, "Have a tied capbset object");
     for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
         s/^CAP_//;
@@ -15,8 +15,8 @@ SKIP: {
 }
 
 SKIP: {
-    skip "capbset_drop not available", 34 unless Linux::Prctl->can('capbset_drop');
-    skip "Drop tests only makes sense when run as root", 34 unless $< == 0;
+    skip "capbset_drop not available", 36 unless Linux::Prctl->can('capbset_drop');
+    skip "Drop tests only makes sense when run as root", 36 unless $< == 0;
     for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
         s/^CAP_//;
         $_ = lc($_);

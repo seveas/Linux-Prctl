@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 275;
+use Test::More tests => 291;
 use Linux::Prctl qw(:constants);
 
 is(defined(tied %Linux::Prctl::cap_permitted), 1, "Have a tied cap_permitted object");

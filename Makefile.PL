@@ -33,6 +33,7 @@ my @constants = qw(
         CAP_SETGID
         CAP_SETPCAP
         CAP_SETUID
+        CAP_SYSLOG
         CAP_SYS_ADMIN
         CAP_SYS_BOOT
         CAP_SYS_CHROOT
@@ -44,6 +45,7 @@ my @constants = qw(
         CAP_SYS_RESOURCE
         CAP_SYS_TIME
         CAP_SYS_TTY_CONFIG
+        CAP_WAKE_ALARM
         ENDIAN_BIG
         ENDIAN_LITTLE
         ENDIAN_PPC_LITTLE
