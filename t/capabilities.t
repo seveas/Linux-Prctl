@@ -4,6 +4,8 @@ use warnings;
 use Test::More tests => 291;
 use Linux::Prctl qw(:constants);
 
+my %new_caps = ("syslog" => 1, "wake_alarm" => 1);
+
 is(defined(tied %Linux::Prctl::cap_permitted), 1, "Have a tied cap_permitted object");
 is(defined(tied %Linux::Prctl::cap_effective), 1, "Have a tied cap_effective object");
 is(defined(tied %Linux::Prctl::cap_inheritable), 1, "Have a tied cap_inheritable object");
@@ -12,7 +14,14 @@ for(@{$Linux::Prctl::EXPORT_TAGS{capabilities}}) {
     SKIP: {
         s/^CAP_//;
         $_ = lc($_);
-        eval{my $ign = $Linux::Prctl::cap_permitted{$_}; 1} or skip("$_ not defined", 8);
+        eval {
+            my $ign = $Linux::Prctl::cap_permitted{$_};
+            1;
+        } or do {
+            if($@ =~ /Invalid argument|has not defined/ && exists($new_caps{$_})) {
+                skip("$_ not defined", 8);
+            }
+        };
         is($Linux::Prctl::cap_permitted{$_}, $R, "Checking whether $_ is set in cap_permitted");
         is($Linux::Prctl::cap_effective{$_}, $R, "Checking whether $_ is set in cap_effective");
         is($Linux::Prctl::cap_inheritable{$_}, 0, "Checking whether $_ is set in cap_inheritable");

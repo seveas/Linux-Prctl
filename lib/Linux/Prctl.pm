@@ -8,7 +8,7 @@ use Linux::Prctl::Securebits;
 use Linux::Prctl::CapabilityBoundingSet;
 use Linux::Prctl::CapabilitySet;
 
-our $VERSION = '1.4.0';
+our $VERSION = '1.4.1';
 
 require XSLoader;
 my @noexport = keys %Linux::Prctl::;
