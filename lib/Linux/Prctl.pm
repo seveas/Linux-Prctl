@@ -192,14 +192,16 @@ process, assuming other requirements are met (matching uid, wasn't setuid,
 etc). Use pid 0 to disallow all processes. For more details, see
 /etc/sysctl.d/10-ptrace.conf.
 
-This is an ubuntu specific call, appearing as of Ubuntu 10.10
+This function is only available for kernel 3.4 and newer, or Ubuntu 10.10 and
+newer.
 
 =head3 get_ptracer(pid)
 
 Returns the top of the process tree that is allowed to use PTRACE on the
 calling process. See set_ptracer.
 
-This is an ubuntu specific call, appearing as of Ubuntu 10.10
+This function is only available for kernel 3.4 and newer, or Ubuntu 10.10 and
+newer.
 
 =head3 set_seccomp(mode)
 
