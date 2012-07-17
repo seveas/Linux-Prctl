@@ -67,9 +67,9 @@ Linux::Prctl - Perl extension for controlling process characteristics
 
 The linux prctl function allows you to control specific characteristics of a
 process' behaviour. Usage of the function is fairly messy though, due to
-limitations in C and linux. This module provides a nice non-messy python(ic)
-interface. Most of the text in this documentation is based on text from the
-linux manpages prctl(2) and capabilities(7)
+limitations in C and linux. This module provides a nice non-messy interface.
+Most of the text in this documentation is based on text from the linux manpages
+prctl(2) and capabilities(7)
 
 Besides prctl, this library also wraps libcap for complete capability handling.
 
