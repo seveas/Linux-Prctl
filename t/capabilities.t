@@ -1,6 +1,10 @@
 use strict;
 use warnings;
 
+BEGIN {
+    $ENV{LANG}, $ENV{LANGAUGE} = $ENV{LC_MESSAGES} = $ENV{LC_ALL} = "C";
+}
+
 use Test::More tests => 291;
 use Linux::Prctl qw(:constants);
 
