@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 
-BEGIN {
-    $ENV{LANG}, $ENV{LANGAUGE} = $ENV{LC_MESSAGES} = $ENV{LC_ALL} = "C";
-}
-
 use Test::More tests => 291;
 use Linux::Prctl qw(:constants);
+
+use POSIX qw(setlocale LC_ALL);
+setlocale(LC_ALL, 'C');
 
 my %new_caps = ("syslog" => 1, "wake_alarm" => 1);
 
